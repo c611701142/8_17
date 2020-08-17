@@ -290,7 +290,6 @@ private:
     // 親番号に対する子の集合を返すための関数
     std::vector<uint8_t> GetChildren(int r) {
         std::vector<uint8_t> row;
-        int count = 0;
         //std::cout << "base : " << bc_[r].base << std::endl;
         if(bc_[r].base == kEmptyBase) {
             return row;
@@ -298,23 +297,15 @@ private:
         for(int i = 1; i < MaxUint8_t; i++) {
             uint8_t c = i;
             int idx = bc_[r].base + c;
-            if(r == bc_[idx].check) {
-                if (bc_.size() > idx) {
-                    //row[c] = 0;
-                    row.emplace_back();
-                    row[count] = c;
-                    count++;
-                }
+            if(idx < bc_.size() and r == bc_[idx].check) {
+                row.push_back(c);
             }
         }
 
         if (r != 0) {
             int idx = bc_[r].base + kLeafChar;
-            if(r == bc_[idx].check) {
-                if (bc_.size() > idx) {
-                    row.emplace_back();
-                    row[kLeafChar] = 0;
-                }
+            if(idx < bc_.size() and r == bc_[idx].check) {
+                row.push_back(kLeafChar);
             }
         }
 
