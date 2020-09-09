@@ -20,12 +20,12 @@ void test(int num) {
 
 
 
-int main(int argc, char* argv[]) {
+int main(int argc, char* argv[]) {//コマンドライン引数 argcはコマンドの数
     b3prac::Tester tester;
     chrono::system_clock::time_point start, end;
     start = chrono::system_clock::now();
     if (argc == 1) {
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < 4; i++) {
             std::cout << "Test" << i << std::endl;
         }
 
@@ -37,7 +37,6 @@ int main(int argc, char* argv[]) {
 
     double time = static_cast<double>(chrono::duration_cast<chrono::microseconds>(end - start).count() / 1000.0);
     printf("time %lf[ms]\n", time);
-
     return 0;
 
     

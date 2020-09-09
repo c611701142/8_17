@@ -26,30 +26,32 @@ private:
         Unit(int b, int c) : base(b),check(c) {}
     };
     std::vector<Unit> bc_;
-    //bc_ = {kEmptyBase, 0}; // set root element
 public:
     //StringSet() = default;
     StringSet() {
         bc_ = {{kEmptyBase, 0}}; // set root element
     }
-    // 文字列を追加するための関数
-    void insert(const std::string str) {
-        int node = 0;
-        int n = 0;
-        for(uint8_t c : str) {//各文字に１　数字を割り当て
-           
+    
+private:
+    //配列がその要素を含むようにサイズを変更する必要がある
+    void w_base(int index,int val){
+        if(index > bc_.size()){
+            bc_.resize(index);
         }
+
+        bc_[index].base = val;
+
     }
 
-private:
     //base[index]にvalを格納する
      //valは設定する値
      //index > DA_SIZEの時のDA_SIZEをindexまで拡張する
     void w_check(int index,int val){
-        bc_[index].check = val;
         if(index > bc_.size()){
             bc_.resize(index);
         }
+
+        bc_[index].check = val;
      }
 
     //9/4
@@ -79,103 +81,131 @@ private:
             exit(0);
         }
     }
-
-    void w_base(int index,int val){
-        bc_[index].base = val;
-        if(index > bc_.size()){
-            bc_.resize(index);
-        }
-
-
-    }
-
-public:
-    //キー追加時に衝突が起こった場合、ノードの移動によって衝突を回避し、
-    //キーの残りの文字列を追加する
-    void insert2(int index,int pos){
-        std::string str;
-        std::vector<uint8_t> row;
-        uint8_t c;
-        std::vector<uint8_t> a;
-        //衝突が起こったときの処理 I-1
-        //for(uint8_t c : str) {//各文字に１　数字を割り当て
-            int idx = bc_[index].base + c;
-            if(bc_[idx].check > 0){
-                row = getlabel(index);//変数Rにセット
-            //}
-        //遷移先の定義 I-2
-        int t = bc_[index].base + c;
-        //bc_[index].check = w_check(t,index);遷移を定義？
-        pos++;
-        //残りの文字列の追加 I-3
-        //a_posとは何か？
-        int new_base = x_check(a[pos]);//新しいbase値を定義
-        t = bc_[index].base + a[pos];
-        bc_[t].check = index;
-        pos++;
-
-        //まだ追記あり　２３２２
-        }
-    }
-
-    void modify(int index,std::vector<uint8_t> row,int b){
-        uint8_t c;
-        int q = 0;
-        //M-1新しいbase[index]の決定
-        int old_base = bc_[index].base;//退避しておく
-        //bc_[index].base = w_check(index,b);//新しいbase値を設定
-        //M-2遷移の移動
-        int old_t = old_base + c;
-        int t =  bc_[index].base + c;
-        w_base(t,bc_[old_t].base);
-        if(bc_[old_t].base > 0){
-            if(bc_[q].check == old_t){
-                //bc_[q].check = w_check(q,t);
+    //8.30~黒田記述 
+    //transitionを確認するための関数
+    int forward(int r,uint8_t c)const{
+        int t = bc_[r].base + c;
+        if(0 < t && t < bc_.size() + 1){
+            if(bc_[t].check == r){
+                return t;
             }
-        } //新しい遷移先の遷移先の再定義が必要になる M-3
-         //check[q] = old_base　になるすべてのq にたいしてw_check(q,t)により、checkを再定義
+        }
+        else{
+            return kFailedIndex;//遷移失敗0を変えす
+        }
+    }// control reaches end of non-void function
+public:
+     void modify(int index,std::vector<uint8_t> row,int b){
+        const std::string str;
+        int q = 0;
+        for(uint8_t c : str) {//各文字に１　数字を割り当て
+            //M-1新しいbase[index]の決定
+            int old_base = bc_[index].base;//退避しておく
+            //bc_[index].base = w_check(index,x_check(b));//新しいbase値を設定　ここエラー
+            w_check(index,x_check(b));//新しいbase値を設定
+            //M-2遷移の移動
+            int old_t = old_base + c;
+            int t =  bc_[index].base + c;
+            w_base(t,bc_[old_t].base);//古い遷移先のbase値をコピー
+            if(bc_[old_t].base > 0){
+                if(bc_[q].check == old_t){//手順M-3
+                    w_check(q,t);//新しい遷移先の遷移先を再定義
+                }
+            } 
+
+        }
         
     }
     
+
+    //キー追加時に衝突が起こった場合、ノードの移動によって衝突を回避し、
+    //キーの残りの文字列を追加する
+    void insert(int index,int pos){
+        const std::string str;
+        std::vector<uint8_t> row;
+        uint8_t c;
+        if(bc_[index].base >= 0){//遷移している
+            //衝突が起こったときの処理 I-1
+            for(uint8_t c : str) {//各文字に１　数字を割り当て
+                int t = bc_[index].base + c;
+                if(bc_[t].check > 0){
+                    row = getlabel(index);//変数Rにセット
+                    modify(index,row,c);//ノードの移動処理
+                //}
+                //遷移先の定義 I-2
+                int t = bc_[index].base + c;
+                w_check(t,index);//遷移を定義
+                pos++;
+                //残りの文字列の追加 I-3
+                //a_posとは何か？
+                int new_base = x_check(c);//新しいbase値を定義
+                t = bc_[index].base + c;
+                //bc_[t].check = w_check(t,index);
+                w_check(t,index);
+                pos++;
+                }
+                else if(bc_[t].check < 0){//葉ノード
+                w_base(t,-1);
+                }
+            }
+        }
+    }
+
     //葉ノードindexを削除することで実現
     //検索成功時に呼び出す
     void delete_sucsess(int index){
         w_base(index,0);
         w_check(index,0); 
     }
+
+    // 文字列を追加するための関数
+    int trie_search(const std::string str) {
+        //D-1初期化
+        int index = 1;//現在のindex番号
+        int pos = 1;//キーの文字位置を示す
+        //D-3終了判定
+        //std::cout << str << std::endl;
+        if(bc_[index].base >= 0){//遷移している
+            //D-2
+            for(uint8_t c : str) {//各文字に１　数字を割り当て
+                int t = forward(index,c);
+                std::cout << "-----------------------------" << std::endl;
+                std::cout << str << std::endl;
+                std::cout << t << std::endl;
+                std::cout << c << std::endl;
+                if(t == 0){//探索失敗
+                    //この時にinsertを呼び出すことで、追加アルゴリズムが実現(2.2.2.)
+                    insert(index,pos);
+                    return 0;
+                    exit(1);
+                }
+                else if(t != 0){
+                    t = index;
+                    pos++;//次の文字を探索するためインクリメント
+                }
+            
+            }
+        }
+        else if(bc_[index].base < 0 ){//indexは葉ノードとなり、検索成功
+            delete_sucsess(index);
+            return index;
+        }
+    }
+
 //単語
     bool contains(const std::string& key) const {
-        int node = 0; // root
-        //std::cout << "--------------contains---------------" << std::endl;
-        //std::cout << "key : " << key << std::endl;
-        for (uint8_t c : key) {//一文字ずつループを回す
-            //std::cout << "uint8_t : " << c << std::endl;
-            //std::cout << "node  : " << node << std::endl;
-            int next_node = forward(node, c);
-           // std::cout << "check : " << bc_[next_node].check << std::endl;
-            if (next_node == kFailedIndex) {
-                //std::cout << "-------Fauiled value check------------" << std::endl;
-                //std::cout << key << std::endl;
-                int tmp_base = 0;
-                for(uint8_t a : key) {
-                    //std::cout << "c: " << a << ", " << int(a) << std::endl;
-                    //std::cout << "node : " << tmp_base << std::endl;
-                    //std::cout << "base : " << bc_[tmp_base].base << std::endl;
-                    int tmp_next = bc_[tmp_base].base + a;
-                    //std::cout << "tmp_next : " << tmp_next << std::endl;
-                    //std::cout << "check : " << bc_[tmp_next].check << std::endl;
-                    if(tmp_base != bc_[tmp_next].check) {
-                        break;
-                    }
-                    tmp_base = tmp_next;
-                }
-                return false;//このif文に入るとFailedになる
+        int node = 1; // root
+        for (uint8_t c : key) {
+            int next_node = bc_[node].base + c;
+            if (bc_[next_node].check != node) {
+                return false;
             }
             node = next_node;
         }
         // '\0'
-        int next_node = forward(node, kLeafChar);
-        return next_node != kFailedIndex;
+        int next_node = bc_[node].base + kLeafChar;
+        std::cout << bc_[next_node].check  << std::endl;
+        return bc_[next_node].check == node;
     }
 private:
     int find_base(const std::unordered_map<uint8_t, int>& row) const {
@@ -200,7 +230,7 @@ private:
 
     void expand(int index) {
         if (index < bc_.size()){
-            return;
+            return ;
             //std::cout << "index : " << index << std::endl;
         }
         //std::cout << "index : " << index << std::endl;
@@ -241,20 +271,7 @@ private:
 
         return row;
     }
-    //8.30~黒田記述 
-    //transitionを確認するための関数
-    int forward(int r,uint8_t c)const{
-        int t = bc_[r].base + c;
-        if(0 < t && t < bc_.size() + 1){
-            if(bc_[t].check == r){
-                return t;
-            }
-        }
-        else{
-            return kFailedIndex;//遷移失敗0を変えす
-        }
-        return t;//警告けすため　
-    }// control reaches end of non-void function
+    
 
    
 
