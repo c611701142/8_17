@@ -29,7 +29,7 @@ private:
 public:
     //StringSet() = default;
     StringSet() {
-        bc_ = {{kEmptyBase, 0}}; // set root element
+        bc_ = {{kEmptyBase, 1}}; // set root element
     }
     
 private:
@@ -169,15 +169,17 @@ public:
             //D-2
             for(uint8_t c : str) {//各文字に１　数字を割り当て
                 int t = forward(index,c);
+                /*
                 std::cout << "-----------------------------" << std::endl;
                 std::cout << str << std::endl;
                 std::cout << t << std::endl;
                 std::cout << c << std::endl;
+                */
                 if(t == 0){//探索失敗
                     //この時にinsertを呼び出すことで、追加アルゴリズムが実現(2.2.2.)
                     insert(index,pos);
                     return 0;
-                    exit(1);
+                    exit(0);
                 }
                 else if(t != 0){
                     t = index;
@@ -196,6 +198,7 @@ public:
     bool contains(const std::string& key) const {
         int node = 1; // root
         for (uint8_t c : key) {
+            std::cout << key  << std::endl;
             int next_node = bc_[node].base + c;
             if (bc_[next_node].check != node) {
                 return false;
@@ -204,7 +207,6 @@ public:
         }
         // '\0'
         int next_node = bc_[node].base + kLeafChar;
-        std::cout << bc_[next_node].check  << std::endl;
         return bc_[next_node].check == node;
     }
 private:
