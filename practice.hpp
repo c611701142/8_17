@@ -6,9 +6,11 @@
 //#include <map>
 //map は 二分木 を使っているために、キーから要素を取り出す処理時間が O(log N) で、そこそこ高速である。
 //#include <set>
-#include <string_view>//ヘッダでは、所有権を持たず文字列を参照する文字列クラスを定義する。
-#include <cassert>
+//#include <string_view>//ヘッダでは、所有権を持たず文字列を参照する文字列クラスを定義する。
+//#include <cassert>
 //assertを使用するため　
+//先頭要素の添え字を1にするか0にするかの違いです。
+//例えば、0-indexでbc_[bc_.size()]にアクセスすると配列外参照になります。
 
 namespace b3prac {
 
@@ -29,9 +31,53 @@ private:
 public:
     //StringSet() = default;
     StringSet() {
-        bc_ = {{kEmptyBase, 1}}; // set root element
+        bc_ = {{kEmptyBase, 0}}; // set root element
     }
-    
+    /*
+     StringSet(const std::vector<std::string>& str_list) {
+        //std::cout << str_list[1] << std::endl;
+        // Create table
+        std::vector<std::unordered_map<uint8_t, int>> table(1);
+        for (auto& key : str_list) {
+            int node = 0;
+            for (uint8_t c : key) {
+                if (table[node].count(c) == 1) { // exists
+                    node = table[node][c];
+                } else {
+                    auto new_node = table.size();
+                    //std::cout << new_node << std::endl;
+                    table.emplace_back();
+                    table[node][c] = new_node;
+                    node = new_node;
+                }
+            }
+            if (table[node].count(kLeafChar) == 0) {
+                table[node][kLeafChar] = 1;
+            }
+        }
+
+        // Convert from table to Double-Array
+        std::vector<int> row_to_index(table.size());
+        bc_ = {0, kEmptyCheck}; // set root element
+        row_to_index[0] = 0;
+        for (int i = 0; i < table.size(); i++) {
+            auto& row = table[i];
+            if (row.empty())
+                continue;
+            int parent_index = row_to_index[i];
+            int base = find_base(row);
+            bc_[parent_index].base = base;
+            for (auto p : row) {
+                uint8_t c = p.first;
+                int next_row = p.second;
+                int next_index = base + c;
+                expand(next_index);
+                bc_[next_index].check = parent_index;
+                row_to_index[next_row] = next_index;
+            }
+        }
+    }
+    */
 private:
     //配列がその要素を含むようにサイズを変更する必要がある
     void w_base(int index,int val){
@@ -56,36 +102,41 @@ private:
 
     //9/4
     //新しいbase値の決定
-     int x_check(int a){
+    int x_check(int a){
         //D-1　初期化
-        int q = 1;bool flag = true;
-        uint8_t c;
-        //D-3  終了判定
-        if(q <= bc_.size() ){
-            flag = true;
-        }
-        else if(q > bc_.size()){
-            flag = false;
-        }
-        //D-2 インデックス検索  flag = trueで入る
-        if(flag == true){
-            if(bc_[q + c].check == 0){
+        const std::string str;
+        int q = 0;bool flag = true;
+        for(uint8_t c : str) {
+            //D-3  終了判定
+            if(q <= bc_.size() ){
+                if(bc_[q + c].check == 0){
+                    return q;
+                }
+                else{
+                    q++;  
+                }
+            }
+            else if(q > bc_.size()){
                 return q;
             }
-            else{
-                q++;  
-            }
+            //D-2 インデックス検索  flag = trueで入る
         }
-        else if(flag == false){
-            return q;
-            exit(0);
-        }
+        
     }
     //8.30~黒田記述 
     //transitionを確認するための関数
     int forward(int r,uint8_t c)const{
         int t = bc_[r].base + c;
-        if(0 < t && t < bc_.size() + 1){
+        //bc_.resize(t);　いつbc_.sizeを拡張すればいいかがわかりません
+        std::cout << bc_[r].base << std::endl;
+        std::cout << c << std::endl;
+        std::cout << t << std::endl;
+        //今失敗になっているのはここで0を返しているから
+        //
+        if(0 < t /*&& t < bc_.size() + 1*/){
+            std::cout << r << std::endl;
+            std::cout << bc_[t].check << std::endl;
+            std::cout << "eeeeeeeeeeeeeee" << std::endl;
             if(bc_[t].check == r){
                 return t;
             }
@@ -94,6 +145,16 @@ private:
             return kFailedIndex;//遷移失敗0を変えす
         }
     }// control reaches end of non-void function
+
+     void expand(int index) {
+        if (index < bc_.size()){
+            return ;
+            //std::cout << "index : " << index << std::endl;
+        }
+        //std::cout << "index : " << index << std::endl;
+        bc_.resize(index+1);
+        //std::cout << "index : " << index << std::endl;
+    }
 public:
      void modify(int index,std::vector<uint8_t> row,int b){
         const std::string str;
@@ -161,14 +222,18 @@ public:
     // 文字列を追加するための関数
     int trie_search(const std::string str) {
         //D-1初期化
-        int index = 1;//現在のindex番号
-        int pos = 1;//キーの文字位置を示す
+        int index = 0;//現在のindex番号
+        int pos = 0;//キーの文字位置を示す
         //D-3終了判定
         //std::cout << str << std::endl;
         if(bc_[index].base >= 0){//遷移している
+            std::cout << str << std::endl;
             //D-2
             for(uint8_t c : str) {//各文字に１　数字を割り当て
                 int t = forward(index,c);
+                //expand(t);
+                //こうすると、terminate called after throwing an instance of 'std::length_error'what():  vector::_M_default_append
+                //std::cout << t << std::endl;
                 /*
                 std::cout << "-----------------------------" << std::endl;
                 std::cout << str << std::endl;
@@ -196,17 +261,18 @@ public:
 
 //単語
     bool contains(const std::string& key) const {
-        int node = 1; // root
+        int node = 0; // root
         for (uint8_t c : key) {
-            std::cout << key  << std::endl;
             int next_node = bc_[node].base + c;
             if (bc_[next_node].check != node) {
+                //std::cout << "wwwwwwwwwwwwwwwwww" << std::endl;
                 return false;
             }
             node = next_node;
         }
         // '\0'
         int next_node = bc_[node].base + kLeafChar;
+        std::cout << "wwwwwwwwwwwwwwwwww" << std::endl;
         return bc_[next_node].check == node;
     }
 private:
@@ -228,16 +294,6 @@ private:
         }
         std::cout << "DA_SIZE() : " << bc_.size() << std::endl;
         return bc_.size();
-    }
-
-    void expand(int index) {
-        if (index < bc_.size()){
-            return ;
-            //std::cout << "index : " << index << std::endl;
-        }
-        //std::cout << "index : " << index << std::endl;
-        bc_.resize(index+1);
-        //std::cout << "index : " << index << std::endl;
     }
 
      //ノードindexからでる遷移ラベルを要素とする集合Rを返す
