@@ -36,9 +36,7 @@ public://同じファイル内のみで使う変数
                 bool check = true;
                 word++;
                 //int n2;
-                //std::cout << "rrrrrrrrrrrrrrrrrrrrrrr" << std::endl;
-                strset.trie_search(str);
-                std::cout << "-------------------------" << std::endl;
+                strset.insert(str);
                 for(int i=0; i < word; i++) {//単語数繰り返し(1単語ずつtestする)
                     check &= test(str_list[i]);
                     if(!check) {
@@ -48,12 +46,12 @@ public://同じファイル内のみで使う変数
                         break;
                     }
                 }
-                //std::cout << word << std::endl;
-                //std::cout << str << std::endl;
+                std::cout << word << std::endl;
+                std::cout << str << std::endl;
                 std::cout << (check == true ? "OK" : "Failed") << std::endl;
                 //checkが0ならok 1ならFailed表示
                 if(!check) {
-                    //exit(1);//プログラム異常終了
+                    exit(1);//プログラム異常終了
                 }
             }
         }    
@@ -64,7 +62,7 @@ public://同じファイル内のみで使う変数
             for(std::string str : str_list) {//ここ検索
                 word++;
                 std::cout << "qqqqqqqqqqqqqqqqq" << std::endl;
-                strset.trie_search(str);//「挿入したキー」で検索
+                strset.insert(str);//「挿入したキー」で検索
                 std::cout << word << std::endl;
             }
             for(std::string str : str_list) {//ここ検索
@@ -84,7 +82,7 @@ public://同じファイル内のみで使う変数
             
                 //checkが0ならok 1ならFailed表示
                 if(check == false) {
-                    //exit(1);//プログラム異常終了
+                    exit(1);//プログラム異常終了
                 }
             }
         
