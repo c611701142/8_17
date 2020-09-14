@@ -36,7 +36,7 @@ public://同じファイル内のみで使う変数
                 bool check = true;
                 word++;
                 //int n2;
-                //std::cout << "rrrrrrrrrrrrrrrrrrrrrrr" << std::endl;
+                std::cout << "rrrrrrrrrrrrrrrrrrrrrrr" << std::endl;
                 strset.trie_search(str);
                 std::cout << "-------------------------" << std::endl;
                 for(int i=0; i < word; i++) {//単語数繰り返し(1単語ずつtestする)
@@ -53,7 +53,7 @@ public://同じファイル内のみで使う変数
                 std::cout << (check == true ? "OK" : "Failed") << std::endl;
                 //checkが0ならok 1ならFailed表示
                 if(!check) {
-                    //exit(1);//プログラム異常終了
+                    exit(1);//プログラム異常終了
                 }
             }
         }    

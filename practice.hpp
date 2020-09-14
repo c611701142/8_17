@@ -127,21 +127,25 @@ private:
     //transitionを確認するための関数
     int forward(int r,uint8_t c)const{
         int t = bc_[r].base + c;
-        //bc_.resize(t);　いつbc_.sizeを拡張すればいいかがわかりません
-        std::cout << bc_[r].base << std::endl;
-        std::cout << c << std::endl;
+        //bc_[t].check = r;
+        //expand(t);//要素を加えるので、配列の成長
+        //std::cout << "size" << bc_.size() << std::endl;
         std::cout << t << std::endl;
-        //今失敗になっているのはここで0を返しているから
-        //
-        if(0 < t /*&& t < bc_.size() + 1*/){
-            std::cout << r << std::endl;
-            std::cout << bc_[t].check << std::endl;
-            std::cout << "eeeeeeeeeeeeeee" << std::endl;
+        //std::cout << c << std::endl;
+        //std::cout << t << std::endl;
+    
+        if(0 < t && t < bc_.size() ){
+            //std::cout << r << std::endl;
+            //std::cout << bc_[t].check << std::endl;
+            //std::cout << "eeeeeeeeeeeeeee" << std::endl;
             if(bc_[t].check == r){
+                std::cout << "r" << r << std::endl;
+                std::cout << "t" << t << std::endl;
+                std::cout << "r to t  trans" << std::endl;
                 return t;
             }
         }
-        else{
+        else if(bc_[r].base == kEmptyBase){
             return kFailedIndex;//遷移失敗0を変えす
         }
     }// control reaches end of non-void function
@@ -225,36 +229,32 @@ public:
         int index = 0;//現在のindex番号
         int pos = 0;//キーの文字位置を示す
         //D-3終了判定
-        //std::cout << str << std::endl;
+        std::cout << str << std::endl;
         if(bc_[index].base >= 0){//遷移している
-            std::cout << str << std::endl;
             //D-2
             for(uint8_t c : str) {//各文字に１　数字を割り当て
                 int t = forward(index,c);
-                //expand(t);
-                //こうすると、terminate called after throwing an instance of 'std::length_error'what():  vector::_M_default_append
-                //std::cout << t << std::endl;
-                /*
-                std::cout << "-----------------------------" << std::endl;
-                std::cout << str << std::endl;
-                std::cout << t << std::endl;
-                std::cout << c << std::endl;
-                */
+                expand(t);//要素を加えるので、配列の成長
+                std::cout << "t=" << t << std::endl;
+                std::cout << "base" << bc_[index].base << std::endl;
+                 std::cout << "index" << index << std::endl;
                 if(t == 0){//探索失敗
                     //この時にinsertを呼び出すことで、追加アルゴリズムが実現(2.2.2.)
                     insert(index,pos);
                     return 0;
-                    exit(0);
+                    //exit(0);
                 }
                 else if(t != 0){
                     t = index;
                     pos++;//次の文字を探索するためインクリメント
+                    std::cout << "pos=" << pos << std::endl;
                 }
             
             }
         }
         else if(bc_[index].base < 0 ){//indexは葉ノードとなり、検索成功
             delete_sucsess(index);
+            std::cout << "iiiiiiiiiiiiiii"  << std::endl;
             return index;
         }
     }
@@ -263,16 +263,21 @@ public:
     bool contains(const std::string& key) const {
         int node = 0; // root
         for (uint8_t c : key) {
-            int next_node = bc_[node].base + c;
+            int next_node = forward(node,c);
+            //bc_[next_node].check == node;
+            //std::cout << "1=" << bc_[node].check << std::endl;
+            //std::cout << "node" << node << std::endl;
+            //std::cout << "2=" << bc_[next_node].check << std::endl;
+            //std::cout << "next_node" << next_node << std::endl;
+            //std::cout << "wwwwwwwwwwwwwwwwww" << std::endl;
             if (bc_[next_node].check != node) {
-                //std::cout << "wwwwwwwwwwwwwwwwww" << std::endl;
+                std::cout << "wwwwwwwwwwwwwwwwww" << std::endl;
                 return false;
             }
             node = next_node;
         }
         // '\0'
         int next_node = bc_[node].base + kLeafChar;
-        std::cout << "wwwwwwwwwwwwwwwwww" << std::endl;
         return bc_[next_node].check == node;
     }
 private:
