@@ -127,12 +127,7 @@ private:
     //transitionを確認するための関数
     int forward(int r,uint8_t c)const{
         int t = bc_[r].base + c;
-        //bc_[t].check = r;
-        //expand(t);//要素を加えるので、配列の成長
-        //std::cout << "size" << bc_.size() << std::endl;
         std::cout << t << std::endl;
-        //std::cout << c << std::endl;
-        //std::cout << t << std::endl;
         if(bc_[r].base == kEmptyBase){
             return kFailedIndex;//遷移失敗0を返す
         }
