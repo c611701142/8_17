@@ -137,13 +137,7 @@ private:
             return kFailedIndex;//遷移失敗0を返す
         }
         if(0 < t && t < bc_.size() ){
-            //std::cout << r << std::endl;
-            //std::cout << bc_[t].check << std::endl;
-            //std::cout << "eeeeeeeeeeeeeee" << std::endl;
             if(bc_[t].check == r){
-                std::cout << "r" << r << std::endl;
-                std::cout << "t" << t << std::endl;
-                std::cout << "r to t  trans" << std::endl;
                 return t;
             }
         }
@@ -153,11 +147,8 @@ private:
      void expand(int index) {
         if (index < bc_.size()){
             return ;
-            //std::cout << "index : " << index << std::endl;
         }
-        //std::cout << "index : " << index << std::endl;
         bc_.resize(index+1);
-        //std::cout << "index : " << index << std::endl;
     }
 public:
      void modify(int index,std::vector<uint8_t> row,int b){
@@ -166,7 +157,6 @@ public:
         for(uint8_t c : str) {//各文字に１　数字を割り当て
             //M-1新しいbase[index]の決定
             int old_base = bc_[index].base;//退避しておく
-            //bc_[index].base = w_check(index,x_check(b));//新しいbase値を設定　ここエラー
             w_check(index,x_check(b));//新しいbase値を設定
             //M-2遷移の移動
             int old_t = old_base + c;
